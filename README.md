@@ -1,26 +1,18 @@
 # Ordis
 
-Ordis is a local-first tool and library that turns messy, unstructured text into
-clean, structured data using a schema-driven extraction pipeline powered by
-LLMs. You give it a schema that describes the fields you expect, point it at
-some raw text, and choose any OpenAI-compatible model. Ordis builds the prompt,
-calls the model, validates the output, and returns either a correct structured
-record or a clear error.
+Ordis is a local-first tool and library that turns messy, unstructured text into clean, structured data using a schema-driven extraction pipeline powered by LLMs. You give it a schema that describes the fields you expect, point it at some raw text, and choose any OpenAI-compatible model. Ordis builds the prompt, calls the model, validates the output, and returns either a correct structured record or a clear error.
 
-**Ordis does for LLM extraction what Prisma does for databases: strict schemas,
-predictable output and no more glue code.**
+**Ordis does for LLM extraction what Prisma does for databases: strict schemas, predictable output and no more glue code.**
 
 ## Status
 
-**✅ CLI functional** - Core extraction pipeline working with real LLMs. Ready
-for testing and feedback.
+**✅ CLI functional** - Core extraction pipeline working with real LLMs. Ready for testing and feedback.
 
 **✅ Programmatic API** - Can be used as an npm package in Node.js applications.
 
 ## Features
 
-- **Local-first extraction**: Supports Ollama, LM Studio, or any
-  OpenAI-compatible endpoint
+- **Local-first extraction**: Supports Ollama, LM Studio, or any OpenAI-compatible endpoint
 - **Schema-first workflow**: Define your data structure upfront
 - **Deterministic output**: Returns validated records or structured failures
 - **Token budget awareness**: Automatic token counting with warnings and limits
@@ -65,7 +57,8 @@ Works with any service exposing an OpenAI-compatible API:
 
 ## Installation
 
-### Run without installation
+Run without installation:
+
 
 ```bash
 npx @ordis-dev/ordis --help
@@ -73,7 +66,8 @@ deno x -RENS npm:@ordis-dev/ordis --help
 bun x @ordis-dev/ordis --help
 ```
 
-### Install globally
+Install globally to use the CLI anywhere:
+
 
 ```bash
 npm install -g @ordis-dev/ordis
@@ -84,7 +78,8 @@ bun install -g @ordis-dev/ordis
 ordis --help
 ```
 
-### Install locally
+Or install locally in your project:
+
 
 ```bash
 npm install @ordis-dev/ordis
@@ -133,55 +128,55 @@ ordis extract \
 Use ordis as a library in your Node.js application:
 
 ```typescript
-import { extract, LLMClient, loadSchema } from "@ordis-dev/ordis";
+import { extract, loadSchema, LLMClient } from '@ordis-dev/ordis';
 
 // Load schema from file
-const schema = await loadSchema("./invoice.schema.json");
+const schema = await loadSchema('./invoice.schema.json');
 
 // Or create schema from object
-import { loadSchemaFromObject } from "ordis-cli";
+import { loadSchemaFromObject } from 'ordis-cli';
 const schema = loadSchemaFromObject({
   fields: {
-    invoice_id: { type: "string" },
-    amount: { type: "number" },
-    currency: { type: "string", enum: ["USD", "EUR", "SGD"] },
-  },
+    invoice_id: { type: 'string' },
+    amount: { type: 'number' },
+    currency: { type: 'string', enum: ['USD', 'EUR', 'SGD'] }
+  }
 });
 
 // Configure LLM
 const llmConfig = {
-  baseURL: "http://localhost:11434/v1",
-  model: "llama3.2:3b",
+  baseURL: 'http://localhost:11434/v1',
+  model: 'llama3.2:3b'
 };
 
 // Extract data
 const result = await extract({
-  input: "Invoice #INV-2024-0042 for $1,250.00 USD",
+  input: 'Invoice #INV-2024-0042 for $1,250.00 USD',
   schema,
-  llmConfig,
+  llmConfig
 });
 
 if (result.success) {
   console.log(result.data);
   // { invoice_id: 'INV-2024-0042', amount: 1250, currency: 'USD' }
-  console.log("Confidence:", result.confidence);
+  console.log('Confidence:', result.confidence);
 } else {
-  console.error("Extraction failed:", result.errors);
+  console.error('Extraction failed:', result.errors);
 }
 ```
 
 **Using LLM Presets:**
 
 ```typescript
-import { extract, LLMPresets, loadSchema } from "@ordis-dev/ordis";
+import { extract, loadSchema, LLMPresets } from '@ordis-dev/ordis';
 
-const schema = await loadSchema("./schema.json");
+const schema = await loadSchema('./schema.json');
 
 // Use preset configurations
 const result = await extract({
   input: text,
   schema,
-  llmConfig: LLMPresets.ollama("llama3.2:3b"),
+  llmConfig: LLMPresets.ollama('llama3.2:3b')
   // Or: LLMPresets.openai(apiKey, 'gpt-4o-mini')
   // Or: LLMPresets.lmStudio('local-model')
 });
@@ -202,12 +197,9 @@ const result = await extract({
 
 ## Performance
 
-Pipeline overhead is negligible (~1-2ms). LLM calls dominate execution time
-(1-10s depending on model). See [benchmarks/README.md](benchmarks/README.md) for
-detailed metrics.
+Pipeline overhead is negligible (~1-2ms). LLM calls dominate execution time (1-10s depending on model). See [benchmarks/README.md](benchmarks/README.md) for detailed metrics.
 
 Run benchmarks:
-
 ```bash
 npm run benchmark
 ```
@@ -215,7 +207,6 @@ npm run benchmark
 ## Roadmap
 
 **Completed in v0.1.0:**
-
 - ✅ Core extraction pipeline with schema validation
 - ✅ Token budget awareness and management
 - ✅ Confidence scoring for extracted data
@@ -225,14 +216,10 @@ npm run benchmark
 - ✅ Support for any OpenAI-compatible API
 
 **Upcoming:**
-
-- [ ] Smart input truncation
-      ([#40](https://github.com/ordis-dev/ordis/issues/40))
-- [ ] Multi-pass extraction for large inputs
-      ([#41](https://github.com/ordis-dev/ordis/issues/41))
+- [ ] Smart input truncation ([#40](https://github.com/ordis-dev/ordis/issues/40))
+- [ ] Multi-pass extraction for large inputs ([#41](https://github.com/ordis-dev/ordis/issues/41))
 - [ ] Config file support ([#16](https://github.com/ordis-dev/ordis/issues/16))
-- [ ] Output formatting options
-      ([#14](https://github.com/ordis-dev/ordis/issues/14))
+- [ ] Output formatting options ([#14](https://github.com/ordis-dev/ordis/issues/14))
 - [ ] Batch extraction ([#19](https://github.com/ordis-dev/ordis/issues/19))
 - [ ] More example schemas ([#13](https://github.com/ordis-dev/ordis/issues/13))
 
