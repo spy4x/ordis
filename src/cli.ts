@@ -5,12 +5,13 @@
  * CLI entrypoint
  */
 
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { loadSchema } from './schemas/loader.js';
-import { extract } from './core/pipeline.js';
-import type { LLMConfig } from './llm/types.js';
-import packageJson from '../package.json' with { type: 'json' };
+import process from "node:process";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import { loadSchema } from "./schemas/loader.js";
+import { extract } from "./core/pipeline.js";
+import type { LLMConfig } from "./llm/types.js";
+import packageJson from "../package.json" with { type: "json" };
 
 interface CliArgs {
     command?: string;
@@ -28,32 +29,32 @@ function parseArgs(args: string[]): CliArgs {
     for (let i = 2; i < args.length; i++) {
         const arg = args[i];
 
-        if (arg === '--help' || arg === '-h') {
+        if (arg === "--help" || arg === "-h") {
             showHelp();
             process.exit(0);
         }
 
-        if (arg === '--version' || arg === '-v') {
+        if (arg === "--version" || arg === "-v") {
             showVersion();
             process.exit(0);
         }
 
-        if (arg === '--debug') {
+        if (arg === "--debug") {
             parsed.debug = true;
             continue;
         }
 
-        if (arg === '--schema' && args[i + 1]) {
+        if (arg === "--schema" && args[i + 1]) {
             parsed.schema = args[++i];
-        } else if (arg === '--input' && args[i + 1]) {
+        } else if (arg === "--input" && args[i + 1]) {
             parsed.input = args[++i];
-        } else if (arg === '--base' && args[i + 1]) {
+        } else if (arg === "--base" && args[i + 1]) {
             parsed.base = args[++i];
-        } else if (arg === '--model' && args[i + 1]) {
+        } else if (arg === "--model" && args[i + 1]) {
             parsed.model = args[++i];
-        } else if (arg === '--api-key' && args[i + 1]) {
+        } else if (arg === "--api-key" && args[i + 1]) {
             parsed.apiKey = args[++i];
-        } else if (!arg.startsWith('--')) {
+        } else if (!arg.startsWith("--")) {
             parsed.command = arg;
         }
     }
@@ -100,26 +101,34 @@ function showVersion(): void {
 async function runExtraction(args: CliArgs): Promise<void> {
     // Validate required arguments
     if (!args.schema) {
-        console.error('Error: --schema is required');
-        console.error('Usage: ordis extract --schema <path> --input <path> --base <url> --model <name>');
+        console.error("Error: --schema is required");
+        console.error(
+            "Usage: ordis extract --schema <path> --input <path> --base <url> --model <name>",
+        );
         process.exit(1);
     }
 
     if (!args.input) {
-        console.error('Error: --input is required');
-        console.error('Usage: ordis extract --schema <path> --input <path> --base <url> --model <name>');
+        console.error("Error: --input is required");
+        console.error(
+            "Usage: ordis extract --schema <path> --input <path> --base <url> --model <name>",
+        );
         process.exit(1);
     }
 
     if (!args.base) {
-        console.error('Error: --base is required');
-        console.error('Usage: ordis extract --schema <path> --input <path> --base <url> --model <name>');
+        console.error("Error: --base is required");
+        console.error(
+            "Usage: ordis extract --schema <path> --input <path> --base <url> --model <name>",
+        );
         process.exit(1);
     }
 
     if (!args.model) {
-        console.error('Error: --model is required');
-        console.error('Usage: ordis extract --schema <path> --input <path> --base <url> --model <name>');
+        console.error("Error: --model is required");
+        console.error(
+            "Usage: ordis extract --schema <path> --input <path> --base <url> --model <name>",
+        );
         process.exit(1);
     }
 
@@ -133,7 +142,7 @@ async function runExtraction(args: CliArgs): Promise<void> {
         const schema = await loadSchema(schemaPath);
 
         if (args.debug) {
-            console.log('[DEBUG] Schema loaded successfully:', {
+            console.log("[DEBUG] Schema loaded successfully:", {
                 name: schema.metadata?.name,
                 fields: Object.keys(schema.fields),
                 confidenceThreshold: schema.confidence?.threshold,
@@ -146,7 +155,7 @@ async function runExtraction(args: CliArgs): Promise<void> {
         }
 
         const inputPath = path.resolve(args.input);
-        const inputText = await fs.readFile(inputPath, 'utf-8');
+        const inputText = await fs.readFile(inputPath, "utf-8");
 
         if (args.debug) {
             console.log(`[DEBUG] Input loaded: ${inputText.length} characters`);
@@ -160,7 +169,7 @@ async function runExtraction(args: CliArgs): Promise<void> {
         };
 
         if (args.debug) {
-            console.log('[DEBUG] LLM config:', {
+            console.log("[DEBUG] LLM config:", {
                 baseURL: llmConfig.baseURL,
                 model: llmConfig.model,
             });
@@ -168,7 +177,7 @@ async function runExtraction(args: CliArgs): Promise<void> {
 
         // Step 4: Run extraction
         if (args.debug) {
-            console.log('[DEBUG] Starting extraction pipeline...');
+            console.log("[DEBUG] Starting extraction pipeline...");
         }
 
         const result = await extract({
@@ -180,8 +189,8 @@ async function runExtraction(args: CliArgs): Promise<void> {
 
         // Step 5: Output results
         if (args.debug) {
-            console.log('[DEBUG] Extraction complete');
-            console.log('[DEBUG] Result:', {
+            console.log("[DEBUG] Extraction complete");
+            console.log("[DEBUG] Result:", {
                 success: result.success,
                 confidence: result.confidence,
                 meetsThreshold: result.meetsThreshold,
@@ -219,15 +228,17 @@ async function runExtraction(args: CliArgs): Promise<void> {
     } catch (error) {
         // Handle unexpected errors
         if (args.debug && error instanceof Error) {
-            console.error('[DEBUG] Stack trace:', error.stack);
+            console.error("[DEBUG] Stack trace:", error.stack);
         }
 
         const errorOutput = {
             success: false,
             errors: [
                 {
-                    message: error instanceof Error ? error.message : String(error),
-                    code: (error as any).code || 'UNKNOWN_ERROR',
+                    message: error instanceof Error
+                        ? error.message
+                        : String(error),
+                    code: (error as any).code || "UNKNOWN_ERROR",
                 },
             ],
         };
@@ -241,13 +252,15 @@ async function main(): Promise<void> {
     const args = parseArgs(process.argv);
 
     if (!args.command) {
-        console.error('Error: No command specified. Use "ordis extract" or "ordis --help"');
+        console.error(
+            'Error: No command specified. Use "ordis extract" or "ordis --help"',
+        );
         process.exit(1);
     }
 
-    if (args.command === 'extract') {
+    if (args.command === "extract") {
         if (args.debug) {
-            console.log('[DEBUG] Starting extraction with args:', {
+            console.log("[DEBUG] Starting extraction with args:", {
                 schema: args.schema,
                 input: args.input,
                 base: args.base,
@@ -257,12 +270,14 @@ async function main(): Promise<void> {
 
         await runExtraction(args);
     } else {
-        console.error(`Error: Unknown command "${args.command}". Use "ordis --help" for usage.`);
+        console.error(
+            `Error: Unknown command "${args.command}". Use "ordis --help" for usage.`,
+        );
         process.exit(1);
     }
 }
 
 main().catch((error) => {
-    console.error('Fatal error:', error.message);
+    console.error("Fatal error:", error.message);
     process.exit(1);
 });
